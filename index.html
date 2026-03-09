@@ -3,110 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Cartoon RPS Mobile</title>
+    <title>3D Cartoon RPS</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
         :root {
-            --bg: #80e0ff;
-            --panel: #ffffff;
-            --primary: #ff8000;
-            --secondary: #4CAF50;
-            --danger: #FF5722;
-            --border: #e0e0e0;
-            --shadow: rgba(0, 0, 0, 0.2);
+            --bg-color: linear-gradient(135deg, #80e0ff 0%, #47a0ff 100%);
+            --primary-color: #ff8000;
+            --secondary-color: #4CAF50;
+            --tertiary-color: #FF5722;
+            --panel-bg: #fdfdfd;
+            --shadow-deep: rgba(0, 0, 0, 0.3);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Odstraní modrý záblesk na mobilu */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--bg);
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            background-attachment: fixed;
             display: flex;
-            flex-direction: column;
-            height: 100vh;
-            justify-content: space-between;
-            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 15px;
         }
 
-        /* Horní část se skóre */
+        .game-wrapper {
+            background-color: var(--panel-bg);
+            border: 5px solid #ccc;
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 0 var(--shadow-deep);
+            width: 100%;
+            max-width: 500px; /* Šířka na PC */
+        }
+
+        /* Skóre */
         .header {
-            background: var(--panel);
-            margin: 15px;
-            padding: 15px 25px;
-            border-radius: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 8px 0 var(--shadow);
-            border: 4px solid var(--primary);
+            background: #fff3e0;
+            border: 4px solid var(--primary-color);
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
         }
 
         .header h1 {
             font-family: 'Fredoka One', cursive;
-            font-size: 1.1rem;
-            color: var(--primary);
-            line-height: 1;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            color: var(--primary-color);
+            text-align: left;
+            line-height: 1.1;
         }
 
         #score {
             font-family: 'Fredoka One', cursive;
-            font-size: 2.5rem;
-            color: var(--primary);
+            font-size: clamp(2rem, 8vw, 3rem);
+            color: var(--primary-color);
         }
 
-        /* Střední část - Aréna */
+        /* Arena */
         .arena {
-            flex-grow: 1;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .battle-row {
-            display: flex;
-            width: 100%;
             justify-content: space-around;
             align-items: center;
-            padding: 0 10px;
+            margin-bottom: 2.5rem;
+            gap: 10px;
         }
 
-        .slot {
-            text-align: center;
-            width: 130px;
-        }
-
-        .slot label {
+        .slot span {
             display: block;
             font-family: 'Fredoka One', cursive;
             font-size: 0.8rem;
             margin-bottom: 10px;
-            color: white;
-            text-shadow: 2px 2px 0 var(--shadow);
+            color: #555;
         }
 
-        .view-circle {
-            width: 110px;
-            height: 110px;
-            background: var(--panel);
+        .choice-display {
+            width: clamp(80px, 22vw, 110px);
+            height: clamp(80px, 22vw, 110px);
+            background: #eee;
+            border: 4px solid #ddd;
             border-radius: 50%;
-            border: 5px solid var(--border);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 10px 0 var(--shadow), inset 0 5px 10px rgba(0,0,0,0.1);
-            font-size: 2rem;
+            box-shadow: 0 8px 0 var(--shadow-deep), inset 0 4px 8px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .view-circle img {
+        .choice-display img {
             width: 85%;
             height: 85%;
             object-fit: contain;
@@ -114,110 +110,105 @@
 
         #result-text {
             font-family: 'Fredoka One', cursive;
-            font-size: 1.8rem;
-            text-align: center;
-            margin: 20px 0;
-            color: white;
-            text-shadow: 3px 3px 0 var(--shadow);
-            min-height: 2.2rem;
+            font-size: clamp(1.2rem, 5vw, 1.6rem);
+            min-width: 80px;
         }
 
-        /* Spodní ovládání */
-        .controls-panel {
-            background: var(--panel);
-            padding: 30px 15px 40px 15px; /* Více místa dole pro moderní mobily */
-            border-radius: 40px 40px 0 0;
-            box-shadow: 0 -10px 20px rgba(0,0,0,0.1);
+        /* Tlačítka */
+        .controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: clamp(10px, 4vw, 20px);
         }
 
         .btn {
-            width: 90px;
-            height: 90px;
-            border-radius: 20px;
-            border: none;
-            background: #f0f0f0;
-            border-bottom: 6px solid #ccc;
+            background: #fff;
+            border: 4px solid var(--primary-color);
+            width: clamp(70px, 20vw, 95px);
+            height: clamp(70px, 20vw, 95px);
+            border-radius: 50%;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 8px 0 var(--shadow-deep);
             transition: all 0.1s;
+            padding: 10px;
         }
 
         .btn:active {
             transform: translateY(4px);
-            border-bottom-width: 2px;
+            box-shadow: 0 4px 0 var(--shadow-deep);
         }
 
         .btn img {
-            width: 70%;
-            height: 70%;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
         }
 
-        /* Barvy pro tlačítka */
-        .btn-rock { border-color: #888; }
-        .btn-paper { border-color: #2196F3; }
-        .btn-scissors { border-color: #E91E63; }
-
-        /* Animace */
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+        /* Reset tlačítko */
+        #reset-btn {
+            margin-top: 2rem;
+            background: none;
+            border: none;
+            color: #999;
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+            visibility: hidden;
         }
 
-        .pop-anim { animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Animace výhry/prohry */
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        #reset-link {
-            position: absolute;
-            bottom: 10px;
-            width: 100%;
-            text-align: center;
-            font-family: 'Fredoka One', cursive;
-            font-size: 0.7rem;
-            color: #444;
-            text-decoration: none;
-            opacity: 0.5;
+        /* Mobilní úprava pro velmi malé telefony */
+        @media (max-width: 360px) {
+            .game-wrapper { padding: 1rem; }
+            .arena { gap: 5px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>SKÓRE<br>HRY</h1>
-        <div id="score">0</div>
-    </div>
+    <div class="game-wrapper">
+        <div class="header">
+            <h1>KÁMEN<br>PAPÍR<br>NŮŽKY</h1>
+            <div id="score">0</div>
+        </div>
 
-    <div class="arena">
-        <div id="result-text">HRAJ!</div>
-        
-        <div class="battle-row">
+        <div class="arena">
             <div class="slot">
-                <label>TY</label>
-                <div class="view-circle" id="player-view">?</div>
+                <span>TY</span>
+                <div class="choice-display" id="player-view">?</div>
             </div>
+            
+            <div id="result-text">HRAJ!</div>
+
             <div class="slot">
-                <label>CPU</label>
-                <div class="view-circle" id="cpu-view">?</div>
+                <span>CPU</span>
+                <div class="choice-display" id="cpu-view">?</div>
             </div>
         </div>
-    </div>
 
-    <div class="controls-panel">
-        <button class="btn btn-rock" onclick="play('rock', 'IMG_4406.png')">
-            <img src="IMG_4406.png" alt="Kámen">
-        </button>
-        <button class="btn btn-paper" onclick="play('paper', 'IMG_4408.png')">
-            <img src="IMG_4408.png" alt="Papír">
-        </button>
-        <button class="btn btn-scissors" onclick="play('scissors', 'IMG_4407.png')">
-            <img src="IMG_4407.png" alt="Nůžky">
-        </button>
-        <a href="#" id="reset-link" onclick="resetGame()">VYNULOVAT SKÓRE</a>
+        <div class="controls">
+            <button class="btn" onclick="play('rock', 'IMG_4406.png')">
+                <img src="IMG_4406.png" alt="Kámen">
+            </button>
+            <button class="btn" onclick="play('paper', 'IMG_4408.png')">
+                <img src="IMG_4408.png" alt="Papír">
+            </button>
+            <button class="btn" onclick="play('scissors', 'IMG_4407.png')">
+                <img src="IMG_4407.png" alt="Nůžky">
+            </button>
+        </div>
+
+        <button id="reset-btn" onclick="resetGame()">VYMAZAT SKÓRE</button>
     </div>
 
     <script>
@@ -227,51 +218,48 @@
             { id: 'paper', img: 'IMG_4408.png' },
             { id: 'scissors', img: 'IMG_4407.png' }
         ];
+        
+        const pView = document.getElementById('player-view');
+        const cView = document.getElementById('cpu-view');
+        const resText = document.getElementById('result-text');
+        const scoreDisp = document.getElementById('score');
+        const resetBtn = document.getElementById('reset-btn');
 
         function play(playerChoiceId, playerImgSrc) {
             const cpuChoice = choices[Math.floor(Math.random() * 3)];
             
-            const pView = document.getElementById('player-view');
-            const cView = document.getElementById('cpu-view');
-            const resText = document.getElementById('result-text');
-
-            // Reset animací
-            pView.classList.remove('pop-anim');
-            cView.classList.remove('pop-anim');
-            void pView.offsetWidth; // Trigger reflow
-
-            // Zobrazení volby
-            pView.innerHTML = `<img src="${playerImgSrc}" class="pop-anim">`;
-            cView.innerHTML = `<img src="${cpuChoice.img}" class="pop-anim">`;
-
-            // Logika
+            pView.innerHTML = `<img src="${playerImgSrc}" class="animate">`;
+            cView.innerHTML = `<img src="${cpuChoice.img}" class="animate">`;
+            
             if (playerChoiceId === cpuChoice.id) {
-                resText.innerText = "REMÍZA!";
-                resText.style.color = "white";
+                resText.innerText = "REMÍZA";
+                resText.style.color = "#888";
             } else if (
                 (playerChoiceId === 'rock' && cpuChoice.id === 'scissors') ||
                 (playerChoiceId === 'paper' && cpuChoice.id === 'rock') ||
                 (playerChoiceId === 'scissors' && cpuChoice.id === 'paper')
             ) {
                 score++;
-                resText.innerText = "VÝHRA! 🎉";
-                resText.style.color = "#00ff88";
+                resText.innerText = "VÝHRA!";
+                resText.style.color = "var(--secondary-color)";
             } else {
                 if(score > 0) score--;
-                resText.innerText = "PROHRA... 💀";
-                resText.style.color = "#ff4444";
+                resText.innerText = "PROHRA";
+                resText.style.color = "var(--tertiary-color)";
             }
 
-            document.getElementById('score').innerText = score;
+            scoreDisp.innerText = score;
+            resetBtn.style.visibility = "visible";
         }
 
         function resetGame() {
             score = 0;
-            document.getElementById('score').innerText = "0";
-            document.getElementById('player-view').innerHTML = "?";
-            document.getElementById('cpu-view').innerHTML = "?";
-            document.getElementById('result-text').innerText = "HRAJ!";
-            document.getElementById('result-text').style.color = "white";
+            scoreDisp.innerText = "0";
+            pView.innerHTML = "?";
+            cView.innerHTML = "?";
+            resText.innerText = "HRAJ!";
+            resText.style.color = "#000";
+            resetBtn.style.visibility = "hidden";
         }
     </script>
 </body>
