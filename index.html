@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Cartoon RPS</title>
+    <title>Retro RPS Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
         :root {
-            --bg-color: linear-gradient(135deg, #80e0ff 0%, #47a0ff 100%);
-            --primary-color: #ff8000;
-            --secondary-color: #4CAF50;
-            --tertiary-color: #FF5722;
-            --panel-bg: #fdfdfd;
-            --shadow-deep: rgba(0, 0, 0, 0.3);
+            --console-bg: #444; /* Tmavě šedá jako tělo konzole */
+            --screen-bg: #222; /* Tmavé pozadí obrazovky */
+            --pixel-green: #0F0; /* Zelená barva pro text obrazovky */
+            --pixel-blue: #00F; /* Modrá akcentní barva */
+            --pixel-red: #F00; /* Červená akcentní barva */
+            --pixel-yellow: #FF0; /* Žlutá akcentní barva */
+            --button-dark: #666; /* Tmavá barva tlačítek */
+            --button-light: #aaa; /* Světlejší barva tlačítek */
+            --border-color: #333; /* Barva okrajů */
+            --shadow-color: rgba(0, 0, 0, 0.6); /* Barva stínu */
         }
 
         * {
@@ -24,191 +27,237 @@
         }
 
         body {
-            background: var(--bg-color);
-            background-attachment: fixed;
+            background-color: #222; /* Velmi tmavé pozadí mimo konzoli */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Press Start 2P', cursive; /* Hlavní pixelový font */
             padding: 15px;
+            overflow: hidden; /* Zabrání scrollování */
         }
 
-        .game-wrapper {
-            background-color: var(--panel-bg);
-            border: 5px solid #ccc;
-            border-radius: 30px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 20px 0 var(--shadow-deep);
+        .console-wrapper {
+            background-color: var(--console-bg);
+            border: 8px solid var(--border-color);
+            border-radius: 12px; /* Mírně zaoblené rohy jako u staré konzole */
+            padding: 20px;
+            box-shadow: 0 15px 30px var(--shadow-color), inset 0 0 15px rgba(255, 255, 255, 0.1);
             width: 100%;
-            max-width: 500px; /* Šířka na PC */
+            max-width: 420px; /* Šířka na PC */
+            position: relative;
         }
 
-        /* Skóre */
-        .header {
+        /* Obrazovka konzole */
+        .screen {
+            background-color: var(--screen-bg);
+            border: 4px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 10px var(--shadow-color);
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pro rozložení textu a ikon */
+            align-items: center;
+            color: var(--pixel-green); /* Barva textu na obrazovce */
+            font-family: 'VT323', monospace; /* Terminálový font pro obrazovku */
+            text-align: center;
+        }
+
+        .screen-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            background: #fff3e0;
-            border: 4px solid var(--primary-color);
-            border-radius: 20px;
-            padding: 15px 20px;
-            margin-bottom: 2rem;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            width: 100%;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
         }
 
-        .header h1 {
-            font-family: 'Fredoka One', cursive;
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            color: var(--primary-color);
-            text-align: left;
-            line-height: 1.1;
+        .screen-top h1 {
+            color: var(--pixel-yellow);
+            font-size: 0.9rem;
         }
 
         #score {
-            font-family: 'Fredoka One', cursive;
-            font-size: clamp(2rem, 8vw, 3rem);
-            color: var(--primary-color);
+            color: var(--pixel-blue);
+            font-size: 1.5rem;
         }
 
-        /* Arena */
-        .arena {
+        .screen-mid {
+            flex-grow: 1;
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            gap: 10px;
-        }
-
-        .slot span {
-            display: block;
-            font-family: 'Fredoka One', cursive;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-            color: #555;
-        }
-
-        .choice-display {
-            width: clamp(80px, 22vw, 110px);
-            height: clamp(80px, 22vw, 110px);
-            background: #eee;
-            border: 4px solid #ddd;
-            border-radius: 50%;
-            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 8px 0 var(--shadow-deep), inset 0 4px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .choice-display img {
-            width: 85%;
-            height: 85%;
-            object-fit: contain;
+            width: 100%;
         }
 
         #result-text {
-            font-family: 'Fredoka One', cursive;
-            font-size: clamp(1.2rem, 5vw, 1.6rem);
-            min-width: 80px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--pixel-yellow);
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.5); /* Malý stín pro čitelnost */
         }
 
-        /* Tlačítka */
-        .controls {
+        .battle-display {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .player-choice, .cpu-choice {
+            width: 80px;
+            height: 80px;
+            background-color: var(--console-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 4px; /* Ostré rohy */
             display: flex;
             justify-content: center;
-            gap: clamp(10px, 4vw, 20px);
+            align-items: center;
+            font-size: 2rem;
+            color: var(--pixel-green);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
         }
 
-        .btn {
-            background: #fff;
-            border: 4px solid var(--primary-color);
-            width: clamp(70px, 20vw, 95px);
-            height: clamp(70px, 20vw, 95px);
-            border-radius: 50%;
+        .player-choice img, .cpu-choice img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            image-rendering: pixelated; /* Klíč pro pixelový vzhled obrázků */
+        }
+
+        /* Ovládací panel pod obrazovkou */
+        .controls-panel {
+            background-color: var(--console-bg);
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            border-top: 2px solid var(--border-color);
+            margin-top: 10px;
+        }
+
+        .control-btn {
+            width: 80px;
+            height: 80px;
+            background-color: var(--button-dark);
+            border: 4px solid var(--border-color);
+            border-radius: 8px; /* Ostré, ale s mírným zaoblením */
+            box-shadow: 0 6px 0 var(--shadow-color);
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 8px 0 var(--shadow-deep);
-            transition: all 0.1s;
-            padding: 10px;
+            transition: all 0.05s linear;
         }
 
-        .btn:active {
+        .control-btn:active {
             transform: translateY(4px);
-            box-shadow: 0 4px 0 var(--shadow-deep);
+            box-shadow: 0 2px 0 var(--shadow-color);
         }
 
-        .btn img {
+        .control-btn img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            image-rendering: pixelated; /* Pro pixelové obrázky */
+            filter: grayscale(100%) brightness(150%); /* Dává "8bitový" nádech */
+        }
+
+        /* Reset Button - speciální styl */
+        #reset-btn {
+            background-color: var(--button-dark);
+            color: var(--pixel-red);
+            border: 2px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            cursor: pointer;
+            visibility: hidden;
+            box-shadow: 0 3px 0 var(--shadow-color);
+            transition: all 0.05s linear;
+        }
+        #reset-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--shadow-color);
+        }
+
+        /* Animace */
+        @keyframes scanline-anim {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        .screen::before { /* Emulace scanlines */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            background: linear-gradient(rgba(0,0,0,0.2) 50%, transparent 50%);
+            background-size: 100% 2px;
+            pointer-events: none;
+            animation: scanline-anim 8s linear infinite; /* Pomalá animace */
         }
-
-        /* Reset tlačítko */
-        #reset-btn {
-            margin-top: 2rem;
-            background: none;
-            border: none;
-            color: #999;
-            font-family: 'Fredoka One', cursive;
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-decoration: underline;
-            visibility: hidden;
-        }
-
-        /* Animace výhry/prohry */
+        
         @keyframes pop {
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .pop-anim { animation: pop 0.2s linear forwards; }
 
-        /* Mobilní úprava pro velmi malé telefony */
-        @media (max-width: 360px) {
-            .game-wrapper { padding: 1rem; }
-            .arena { gap: 5px; }
+        /* Responzivní úpravy */
+        @media (max-width: 450px) {
+            .console-wrapper { padding: 10px; border-width: 5px; }
+            .screen { padding: 10px; margin-bottom: 15px; min-height: 200px; }
+            .screen-top { font-size: 0.7rem; }
+            #score { font-size: 1.2rem; }
+            #result-text { font-size: 0.9rem; margin-bottom: 10px; }
+            .player-choice, .cpu-choice { width: 60px; height: 60px; font-size: 1.5rem; }
+            .control-btn { width: 65px; height: 65px; border-radius: 6px; }
+            .control-btn img { width: 60%; height: 60%; }
+            #reset-btn { font-size: 0.8rem; padding: 6px 10px; margin-top: 15px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="game-wrapper">
-        <div class="header">
-            <h1>KÁMEN<br>PAPÍR<br>NŮŽKY</h1>
-            <div id="score">0</div>
-        </div>
-
-        <div class="arena">
-            <div class="slot">
-                <span>TY</span>
-                <div class="choice-display" id="player-view">?</div>
+    <div class="console-wrapper">
+        <div class="screen">
+            <div class="screen-top">
+                <h1>RETRO RPS</h1>
+                <div>SCORE: <span id="score">0</span></div>
             </div>
-            
-            <div id="result-text">HRAJ!</div>
 
-            <div class="slot">
-                <span>CPU</span>
-                <div class="choice-display" id="cpu-view">?</div>
+            <div class="screen-mid">
+                <div id="result-text">PRESS START</div>
+                <div class="battle-display">
+                    <div class="player-choice" id="player-view">?</div>
+                    <div class="cpu-choice" id="cpu-view">?</div>
+                </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn" onclick="play('rock', 'IMG_4406.png')">
-                <img src="IMG_4406.png" alt="Kámen">
+        <div class="controls-panel">
+            <button class="control-btn" onclick="play('rock', 'IMG_4406.png')">
+                <img src="IMG_4406.png" alt="Rock">
             </button>
-            <button class="btn" onclick="play('paper', 'IMG_4408.png')">
-                <img src="IMG_4408.png" alt="Papír">
+            <button class="control-btn" onclick="play('paper', 'IMG_4408.png')">
+                <img src="IMG_4408.png" alt="Paper">
             </button>
-            <button class="btn" onclick="play('scissors', 'IMG_4407.png')">
-                <img src="IMG_4407.png" alt="Nůžky">
+            <button class="control-btn" onclick="play('scissors', 'IMG_4407.png')">
+                <img src="IMG_4407.png" alt="Scissors">
             </button>
         </div>
 
-        <button id="reset-btn" onclick="resetGame()">VYMAZAT SKÓRE</button>
+        <button id="reset-btn" onclick="resetGame()">RESET GAME</button>
     </div>
 
     <script>
@@ -228,26 +277,29 @@
         function play(playerChoiceId, playerImgSrc) {
             const cpuChoice = choices[Math.floor(Math.random() * 3)];
             
-            pView.innerHTML = `<img src="${playerImgSrc}" class="animate">`;
-            cView.innerHTML = `<img src="${cpuChoice.img}" class="animate">`;
+            pView.innerHTML = `<img src="${playerImgSrc}" class="pop-anim">`;
+            cView.innerHTML = `<img src="${cpuChoice.img}" class="pop-anim">`;
             
+            let textColor = var(--pixel-yellow); // Default text color
+
             if (playerChoiceId === cpuChoice.id) {
-                resText.innerText = "REMÍZA";
-                resText.style.color = "#888";
+                resText.innerText = "IT'S A TIE!";
+                textColor = var(--pixel-blue);
             } else if (
                 (playerChoiceId === 'rock' && cpuChoice.id === 'scissors') ||
                 (playerChoiceId === 'paper' && cpuChoice.id === 'rock') ||
                 (playerChoiceId === 'scissors' && cpuChoice.id === 'paper')
             ) {
                 score++;
-                resText.innerText = "VÝHRA!";
-                resText.style.color = "var(--secondary-color)";
+                resText.innerText = "YOU WIN!";
+                textColor = var(--pixel-green);
             } else {
                 if(score > 0) score--;
-                resText.innerText = "PROHRA";
-                resText.style.color = "var(--tertiary-color)";
+                resText.innerText = "YOU LOSE!";
+                textColor = var(--pixel-red);
             }
-
+            
+            resText.style.color = textColor;
             scoreDisp.innerText = score;
             resetBtn.style.visibility = "visible";
         }
@@ -257,8 +309,8 @@
             scoreDisp.innerText = "0";
             pView.innerHTML = "?";
             cView.innerHTML = "?";
-            resText.innerText = "HRAJ!";
-            resText.style.color = "#000";
+            resText.innerText = "PRESS START";
+            resText.style.color = var(--pixel-yellow);
             resetBtn.style.visibility = "hidden";
         }
     </script>
