@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal RPS</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: #161616;
+            --text-main: #ffffff;
+            --text-dim: #666666;
+            --accent: #ffffff;
+            --border: #282828;
+            --win: #00ff88;
+            --lose: #ff4444;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Score Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            background: var(--card-bg);
+        }
+
+        .header h1 {
+            font-size: 0.75rem;
+            letter-spacing: 0.2rem;
+            color: var(--text-dim);
+            text-align: left;
+            line-height: 1.2;
+        }
+
+        #score {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        /* Battle Field */
+        .arena {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 4rem;
+            gap: 10px;
+        }
+
+        .slot {
+            flex: 1;
+        }
+
+        .slot span {
+            display: block;
+            font-size: 0.65rem;
+            letter-spacing: 0.1rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+
+        .choice-display {
+            width: 80px;
+            height: 80px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .choice-display img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: invert(1); /* Přizpůsobí černé ikony bílému textu */
+        }
+
+        .status-area {
+            min-width: 120px;
+        }
+
+        #result-text {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            height: 1.5rem;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn img {
+            width: 35px;
+            height: 35px;
+            filter: invert(1);
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate {
+            animation: pop 0.3s forwards;
+        }
+
+        #reset-btn {
+            margin-top: 2rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: underline;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-wrapper">
+        <div class="header">
+            <h1>ROCK<br>PAPER<br>SCISSORS</h1>
+            <div id="score">0</div>
+        </div>
+
+        <div class="arena">
+            <div class="slot">
+                <span>YOU</span>
+                <div class="choice-display" id="player-view">?</div>
+            </div>
+            
+            <div class="status-area">
+                <div id="result-text">READY?</div>
+            </div>
+
+            <div class="slot">
+                <span>CPU</span>
+                <div class="choice-display" id="cpu-view">?</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="play('rock')">
+                <img src="rock.png" alt="Rock">
+            </button>
+            <button class="btn" onclick="play('paper')">
+                <img src="paper.png" alt="Paper">
+            </button>
+            <button class="btn" onclick="play('scissors')">
+                <img src="scissors.png" alt="Scissors">
+            </button>
+        </div>
+
+        <button id="reset-btn" onclick="resetGame()">RESET SCORE</button>
+    </div>
+
+    <script>
+        let score = 0;
+        const choices = ['rock', 'paper', 'scissors'];
+        
+        const playerView = document.getElementById('player-view');
+        const cpuView = document.getElementById('cpu-view');
+        const resultText = document.getElementById('result-text');
+        const scoreDisplay = document.getElementById('score');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function play(playerChoice) {
+            const cpuChoice = choices[Math.floor(Math.random() * 3)];
+            
+            // Update UI with images
+            playerView.innerHTML = `<img src="${playerChoice}.png" class="animate">`;
+            cpuView.innerHTML = `<img src="${cpuChoice}.png" class="animate">`;
+            
+            // Logic
+            if (playerChoice === cpuChoice) {
+                updateResult("TIE.", "var(--text-dim)");
+            } else if (
+                (playerChoice === 'rock' && cpuChoice === 'scissors') ||
+                (playerChoice === 'paper' && cpuChoice === 'rock') ||
+                (playerChoice === 'scissors' && cpuChoice === 'paper')
+            ) {
+                score++;
+                updateResult("WIN.", "var(--win)");
+            } else {
+                if(score > 0) score--;
+                updateResult("LOSE.", "var(--lose)");
+            }
+
+            scoreDisplay.innerText = score;
+            resetBtn.style.visibility = "visible";
+        }
+
+        function updateResult(text, color) {
+            resultText.innerText = text;
+            resultText.style.color = color;
+        }
+
+        function resetGame() {
+            score = 0;
+            scoreDisplay.innerText = score;
+            playerView.innerHTML = "?";
+            cpuView.innerHTML = "?";
+            resultText.innerText = "READY?";
+            resultText.style.color = "var(--text-main)";
+            resetBtn.style.visibility = "hidden";
+        }
+    </script>
+</body>
+</html>
