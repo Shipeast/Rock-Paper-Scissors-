@@ -20,7 +20,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
@@ -40,7 +40,6 @@
             text-align: center;
         }
 
-        /* Score Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -65,17 +64,12 @@
             font-weight: 800;
         }
 
-        /* Battle Field */
         .arena {
             display: flex;
             justify-content: space-around;
             align-items: center;
             margin-bottom: 4rem;
             gap: 10px;
-        }
-
-        .slot {
-            flex: 1;
         }
 
         .slot span {
@@ -87,8 +81,8 @@
         }
 
         .choice-display {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 50%;
@@ -97,18 +91,13 @@
             justify-content: center;
             align-items: center;
             font-size: 1.5rem;
-            transition: all 0.3s ease;
+            overflow: hidden; /* Aby obrázek nepřetékal kroužek */
         }
 
         .choice-display img {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-            filter: invert(1); /* Přizpůsobí černé ikony bílému textu */
-        }
-
-        .status-area {
-            min-width: 120px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Vyplní kroužek obrázkem */
         }
 
         #result-text {
@@ -118,52 +107,41 @@
             height: 1.5rem;
         }
 
-        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 1.2rem;
         }
 
         .btn {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            padding: 0;
         }
 
         .btn:hover {
             border-color: var(--accent);
             transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
         }
 
         .btn img {
-            width: 35px;
-            height: 35px;
-            filter: invert(1);
-            opacity: 0.8;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        /* Animations */
         @keyframes pop {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .animate {
-            animation: pop 0.3s forwards;
-        }
+        .animate { animation: pop 0.3s forwards; }
 
         #reset-btn {
             margin-top: 2rem;
@@ -203,13 +181,13 @@
         </div>
 
         <div class="controls">
-            <button class="btn" onclick="play('rock')">
+            <button class="btn" onclick="play('rock', 'IMG_4406.png')">
                 <img src="IMG_4406.png" alt="Rock">
             </button>
-            <button class="btn" onclick="play('paper')">
+            <button class="btn" onclick="play('paper', 'IMG_4408.png')">
                 <img src="IMG_4408.png" alt="Paper">
             </button>
-            <button class="btn" onclick="play('scissors')">
+            <button class="btn" onclick="play('scissors', 'IMG_4407.png')">
                 <img src="IMG_4407.png" alt="Scissors">
             </button>
         </div>
@@ -219,7 +197,11 @@
 
     <script>
         let score = 0;
-        const choices = ['rock', 'paper', 'scissors'];
+        const choices = [
+            { id: 'rock', img: 'IMG_4406.png' },
+            { id: 'paper', img: 'IMG_4408.png' },
+            { id: 'scissors', img: 'IMG_4407.png' }
+        ];
         
         const playerView = document.getElementById('player-view');
         const cpuView = document.getElementById('cpu-view');
@@ -227,20 +209,19 @@
         const scoreDisplay = document.getElementById('score');
         const resetBtn = document.getElementById('reset-btn');
 
-        function play(playerChoice) {
-            const cpuChoice = choices[Math.floor(Math.random() * 3)];
+        function play(playerChoiceId, playerImgSrc) {
+            const randomIdx = Math.floor(Math.random() * 3);
+            const cpuChoice = choices[randomIdx];
             
-            // Update UI with images
-            playerView.innerHTML = `<img src="${playerChoice}.png" class="animate">`;
-            cpuView.innerHTML = `<img src="${cpuChoice}.png" class="animate">`;
+            playerView.innerHTML = `<img src="${playerImgSrc}" class="animate">`;
+            cpuView.innerHTML = `<img src="${cpuChoice.img}" class="animate">`;
             
-            // Logic
-            if (playerChoice === cpuChoice) {
+            if (playerChoiceId === cpuChoice.id) {
                 updateResult("TIE.", "var(--text-dim)");
             } else if (
-                (playerChoice === 'rock' && cpuChoice === 'scissors') ||
-                (playerChoice === 'paper' && cpuChoice === 'rock') ||
-                (playerChoice === 'scissors' && cpuChoice === 'paper')
+                (playerChoiceId === 'rock' && cpuChoice.id === 'scissors') ||
+                (playerChoiceId === 'paper' && cpuChoice.id === 'rock') ||
+                (playerChoiceId === 'scissors' && cpuChoice.id === 'paper')
             ) {
                 score++;
                 updateResult("WIN.", "var(--win)");
